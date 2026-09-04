@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { PageConfig } from '../types';
+import defaultPagesData from '../data/pages.json';
 
 interface PageContextType {
   pages: PageConfig[];
@@ -14,70 +15,33 @@ const PageContext = createContext<PageContextType | undefined>(undefined);
 
 export const PageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [pages, setPages] = useState<PageConfig[]>(() => {
+    const committedPages = (defaultPagesData as PageConfig[]) || [];
     const savedPages = localStorage.getItem('ctaPages');
+    const deletedIds: string[] = JSON.parse(localStorage.getItem('deletedPageIds') || '[]');
+
+    const pageMap = new Map<string, PageConfig>();
+    // Add committed pages that haven't been deleted locally
+    committedPages.forEach(p => {
+      if (!deletedIds.includes(p.id)) {
+        pageMap.set(p.id, p);
+      }
+    });
+
     if (savedPages) {
       try {
         const parsed = JSON.parse(savedPages);
-        if (parsed && parsed.length > 0) return parsed;
+        if (parsed && Array.isArray(parsed) && parsed.length > 0) {
+          parsed.forEach((p: PageConfig) => {
+            if (!deletedIds.includes(p.id)) {
+              pageMap.set(p.id, p);
+            }
+          });
+        }
       } catch (e) {
         console.error("Error parsing pages from local storage", e);
       }
     }
-    // Default initial pages as requested by user
-    return [
-      {
-        id: "client-ola",
-        urlPath: "ola",
-        companyName: "Ola Cabs",
-        heading: "Book Safe & Affordable Rides in Seconds",
-        subHeading: "Experience seamless urban mobility with verified drivers and instant booking.",
-        buttonTitle: "Book Ola Ride Now",
-        buttonColor: "#84cc16",
-        link: "https://www.olacabs.com",
-        backgroundImage: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        badgeText: "India's Preferred Ride-Hailing Service",
-        isActive: true
-      },
-      {
-        id: "client-uber",
-        urlPath: "uber",
-        companyName: "Uber",
-        heading: "Go Anywhere with Uber On-Demand Rides",
-        subHeading: "Reliable rides at the tap of a button, available 24/7 in 10,000+ cities worldwide.",
-        buttonTitle: "Get an Uber Ride",
-        buttonColor: "#000000",
-        link: "https://www.uber.com",
-        backgroundImage: "https://images.unsplash.com/photo-1557223562-6c77ef16210f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        badgeText: "Global Leader in On-Demand Mobility",
-        isActive: true
-      },
-      {
-        id: "client-rapido",
-        urlPath: "rapido",
-        companyName: "Rapido",
-        heading: "Beat Traffic Fast with Rapido Bike Taxis",
-        subHeading: "Quick, affordable, and safe bike rides through city traffic at unbeatable fares.",
-        buttonTitle: "Ride Rapido Now",
-        buttonColor: "#eab308",
-        link: "https://www.rapido.bike",
-        backgroundImage: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        badgeText: "Fastest Bike Taxi & Auto Service",
-        isActive: true
-      },
-      {
-        id: "client-1",
-        urlPath: "gutter-renewal",
-        companyName: "Gutter Renew",
-        heading: "Protect Your Home Foundation with Premium Gutter Renewal",
-        subHeading: "Get a free, fast estimate for gutter cleaning, repair, and replacement in your area.",
-        buttonTitle: "Get Your Free Quote",
-        buttonColor: "#10b981",
-        link: "https://www.gutterrenew.com",
-        backgroundImage: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80",
-        badgeText: "Top-Rated Regional Exterior Specialists",
-        isActive: true
-      }
-    ];
+    return Array.from(pageMap.values());
   });
 
   useEffect(() => {
@@ -85,7 +49,12 @@ export const PageProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [pages]);
 
   const addPage = (page: PageConfig) => {
-    setPages(prev => [...prev, page]);
+    // Clear deletion record if re-added
+    const deletedIds: string[] = JSON.parse(localStorage.getItem('deletedPageIds') || '[]');
+    const updatedDeleted = deletedIds.filter(id => id !== page.id);
+    localStorage.setItem('deletedPageIds', JSON.stringify(updatedDeleted));
+
+    setPages(prev => [...prev.filter(p => p.id !== page.id), page]);
   };
 
   const updatePage = (updatedPage: PageConfig) => {
@@ -93,6 +62,11 @@ export const PageProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const deletePage = (id: string) => {
+    const deletedIds: string[] = JSON.parse(localStorage.getItem('deletedPageIds') || '[]');
+    if (!deletedIds.includes(id)) {
+      deletedIds.push(id);
+      localStorage.setItem('deletedPageIds', JSON.stringify(deletedIds));
+    }
     setPages(prev => prev.filter(p => p.id !== id));
   };
 
@@ -103,7 +77,9 @@ export const PageProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const getPageByUrl = (urlPath: string) => {
-    return pages.find(p => p.urlPath === urlPath);
+    if (!urlPath) return undefined;
+    const normalized = urlPath.trim().toLowerCase();
+    return pages.find(p => p.urlPath.trim().toLowerCase() === normalized);
   };
 
   return (

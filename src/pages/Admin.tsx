@@ -50,7 +50,34 @@ const Admin: React.FC = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData({ ...formData, backgroundImage: reader.result as string });
+        const rawResult = reader.result as string;
+        const img = new Image();
+        img.src = rawResult;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 1200;
+          let width = img.width;
+          let height = img.height;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressed = canvas.toDataURL('image/jpeg', 0.75);
+            setFormData(prev => ({ ...prev, backgroundImage: compressed }));
+          } else {
+            setFormData(prev => ({ ...prev, backgroundImage: rawResult }));
+          }
+        };
       };
       reader.readAsDataURL(file);
     }
@@ -138,6 +165,8 @@ const Admin: React.FC = () => {
       });
 
       if (putRes.ok) {
+        localStorage.setItem('ctaPages', JSON.stringify(pages));
+        localStorage.removeItem('deletedPageIds');
         alert("Successfully added. It will reflect in the next 2 mins.");
       } else {
         const errData = await putRes.json();
@@ -258,7 +287,15 @@ const Admin: React.FC = () => {
                 <input className="input-field" type="url" value={formData.link} onChange={e => setFormData({ ...formData, link: e.target.value })} placeholder="https://example.com" />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Background Image (Optional)</label>
+                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Background Image (URL or Upload)</label>
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="Paste Image URL (e.g. https://images.unsplash.com/...)"
+                  value={formData.backgroundImage && !formData.backgroundImage.startsWith('data:') ? formData.backgroundImage : ''}
+                  onChange={e => setFormData({ ...formData, backgroundImage: e.target.value })}
+                  style={{ marginBottom: '0.5rem' }}
+                />
                 <input type="file" accept="image/*" className="input-field" onChange={handleImageUpload} />
                 {formData.backgroundImage && <img src={formData.backgroundImage} alt="Preview" style={{ height: '60px', borderRadius: '4px', marginTop: '0.5rem', objectFit: 'cover' }} />}
               </div>
