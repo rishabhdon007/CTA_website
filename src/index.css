@@ -216,17 +216,24 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 10;
   max-width: 1000px;
   padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1.25rem;
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 1.5rem;
+  width: fit-content;
+  align-self: center;
 }
 
 .main-heading {
@@ -336,4 +343,30 @@ h1, h2, h3, h4, h5, h6 {
   .top-bar {
     padding: 1rem;
   }
+}
+
+/* Footer Credit Styles */
+.footer-credit {
+  position: relative;
+  z-index: 20;
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  width: 100%;
+  margin-top: auto;
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.footer-link {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.footer-link:hover {
+  color: #60a5fa;
+  text-decoration: underline;
 }

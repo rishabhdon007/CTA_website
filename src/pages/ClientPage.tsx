@@ -1,13 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { usePages } from '../context/PageContext';
 import { motion } from 'framer-motion';
+import FooterCredit from '../components/FooterCredit';
 
 const ClientPage: React.FC = () => {
   const { clientPath } = useParams<{ clientPath: string }>();
   const { getPageByUrl } = usePages();
 
   const page = clientPath ? getPageByUrl(clientPath) : null;
+
+  useEffect(() => {
+    if (page && page.isActive) {
+      document.title = page.companyName || page.heading || 'CTA Page';
+    } else {
+      document.title = '404 - Page Not Found';
+    }
+  }, [page]);
 
   if (!page || !page.isActive) {
     return (
@@ -16,6 +25,7 @@ const ClientPage: React.FC = () => {
            <h1 className="main-heading" style={{ fontSize: '3rem' }}>404</h1>
            <p style={{ color: 'var(--text-muted)' }}>This page could not be found or has been disabled.</p>
          </div>
+         <FooterCredit />
       </div>
     );
   }
@@ -37,7 +47,7 @@ const ClientPage: React.FC = () => {
         </div>
       )}
 
-      <div className="cta-content">
+      <div className="cta-content" style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         {page.badgeText && page.badgeText.trim() !== '' && (
           <motion.div 
             className="badge glass"
@@ -45,7 +55,7 @@ const ClientPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={page.buttonColor || '#10b981'} strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             {page.badgeText}
           </motion.div>
         )}
@@ -92,6 +102,8 @@ const ClientPage: React.FC = () => {
           </motion.div>
         )}
       </div>
+
+      <FooterCredit />
     </div>
   );
 };

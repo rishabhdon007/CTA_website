@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePages } from '../context/PageContext';
 import type { PageConfig } from '../types';
 import { Plus, Edit2, Trash2, Power, PowerOff, GitCommit, ExternalLink, LogOut } from 'lucide-react';
 import { validateAdminCredentials } from '../config/authConfig';
+import FooterCredit from '../components/FooterCredit';
 
 const Admin: React.FC = () => {
   const { pages, addPage, updatePage, deletePage, togglePageStatus } = usePages();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    document.title = 'Admin Dashboard | CTA Manager';
+  }, []);
 
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return localStorage.getItem('isAdminAuth') === 'true';
@@ -296,6 +301,7 @@ const Admin: React.FC = () => {
           )}
         </div>
       )}
+      <FooterCredit />
     </div>
   );
 };
