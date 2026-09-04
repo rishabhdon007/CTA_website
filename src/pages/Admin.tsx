@@ -94,9 +94,9 @@ const Admin: React.FC = () => {
   };
 
   const handleCommit = async () => {
-    const token = import.meta.env.VITE_GITHUB_TOKEN;
+    const token = import.meta.env.GITHUB_TOKEN || import.meta.env.VITE_GITHUB_TOKEN;
     if (!token || token === 'dummy_github_token_here') {
-      alert("GitHub Token not configured. Please set a valid VITE_GITHUB_TOKEN in .env or Vercel Environment Variables to push live commits directly to GitHub.");
+      alert("GitHub Token not configured. Please set a valid GITHUB_TOKEN in .env or Vercel Environment Variables to push live commits directly to GitHub.");
       return;
     }
 

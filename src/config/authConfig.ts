@@ -16,8 +16,8 @@
  */
 
 export const validateAdminCredentials = (username: string, password: string): boolean => {
-  const adminUsername = import.meta.env.VITE_ADMIN_USERNAME || 'admin';
-  const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'password123';
+  const adminUsername = import.meta.env.ADMIN_USERNAME;
+  const adminPassword = import.meta.env.ADMIN_PASSWORD;
 
   return username.trim() === adminUsername && password === adminPassword;
 };
