@@ -16,8 +16,13 @@
  */
 
 export const validateAdminCredentials = (username: string, password: string): boolean => {
-  const adminUsername = import.meta.env.ADMIN_USERNAME;
-  const adminPassword = import.meta.env.ADMIN_PASSWORD;
+  const adminUsername = import.meta.env.ADMIN_USERNAME || import.meta.env.VITE_ADMIN_USERNAME;
+  const adminPassword = import.meta.env.ADMIN_PASSWORD || import.meta.env.VITE_ADMIN_PASSWORD;
+
+  if (!adminUsername || !adminPassword) {
+    console.warn("Admin environment variables (ADMIN_USERNAME / ADMIN_PASSWORD) are not set.");
+    return false;
+  }
 
   return username.trim() === adminUsername && password === adminPassword;
 };

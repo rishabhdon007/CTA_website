@@ -4,6 +4,7 @@ import { defineConfig } from 'vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  envPrefix: ['VITE_', 'ADMIN_', 'GITHUB_'],
   build: {
     rollupOptions: {
       output: {
