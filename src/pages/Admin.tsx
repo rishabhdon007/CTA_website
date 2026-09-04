@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { usePages } from '../context/PageContext';
 import type { PageConfig } from '../types';
 import { Plus, Edit2, Trash2, Power, PowerOff, GitCommit, ExternalLink, LogOut } from 'lucide-react';
+import { validateAdminCredentials } from '../config/authConfig';
 
 const Admin: React.FC = () => {
   const { pages, addPage, updatePage, deletePage, togglePageStatus } = usePages();
@@ -92,17 +93,60 @@ const Admin: React.FC = () => {
     setIsFormOpen(true);
   };
 
-  const handleCommit = () => {
+  const handleCommit = async () => {
     const token = import.meta.env.VITE_GITHUB_TOKEN;
-    alert(`Committing to GitHub... \n\n(This is a mock action for the SPA. In a real app, this would use your token: ${token ? 'Found Token' : 'No Token'} to hit the GitHub API.)`);
+    if (!token || token === 'dummy_github_token_here') {
+      alert("GitHub Token not configured. Please set a valid VITE_GITHUB_TOKEN in .env or Vercel Environment Variables to push live commits directly to GitHub.");
+      return;
+    }
+
+    try {
+      const repo = 'rishabhdon007/CTA_website';
+      const path = 'src/data/pages.json';
+      const jsonString = JSON.stringify(pages, null, 2);
+      // Encode UTF-8 text to base64 safely
+      const content = btoa(unescape(encodeURIComponent(jsonString)));
+
+      let sha = '';
+      const getFileRes = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+        headers: { Authorization: `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+      });
+
+      if (getFileRes.ok) {
+        const fileData = await getFileRes.json();
+        sha = fileData.sha;
+      }
+
+      const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/vnd.github.v3+json'
+        },
+        body: JSON.stringify({
+          message: `Update CTA pages configuration [${new Date().toLocaleTimeString()}]`,
+          content: content,
+          branch: 'test-develop',
+          ...(sha ? { sha } : {})
+        })
+      });
+
+      if (putRes.ok) {
+        alert(`Successfully committed updated pages configuration to branch 'test-develop' on GitHub (rishabhdon007/CTA_website)!`);
+      } else {
+        const errData = await putRes.json();
+        alert(`GitHub API Commit Status: ${errData.message || 'Failed to commit'}`);
+      }
+    } catch (err: any) {
+      alert(`Commit error: ${err.message}`);
+    }
   };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const validUser = import.meta.env.VITE_ADMIN_USERNAME || 'admin';
-    const validPass = import.meta.env.VITE_ADMIN_PASSWORD || 'admin';
 
-    if (loginForm.username === validUser && loginForm.password === validPass) {
+    if (validateAdminCredentials(loginForm.username, loginForm.password)) {
       setIsAuthenticated(true);
       localStorage.setItem('isAdminAuth', 'true');
       localStorage.setItem('adminCredentials', JSON.stringify({
