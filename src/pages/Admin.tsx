@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { usePages } from '../context/PageContext';
 import type { PageConfig } from '../types';
-import { Plus, Edit2, Trash2, Power, PowerOff, GitCommit, ExternalLink, LogOut } from 'lucide-react';
+import { Plus, Edit2, Trash2, Power, PowerOff, GitCommit, ExternalLink, LogOut, Loader2 } from 'lucide-react';
 import { validateAdminCredentials } from '../config/authConfig';
 import FooterCredit from '../components/FooterCredit';
 
@@ -9,6 +9,7 @@ const Admin: React.FC = () => {
   const { pages, addPage, updatePage, deletePage, togglePageStatus } = usePages();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isCommitting, setIsCommitting] = useState(false);
 
   useEffect(() => {
     document.title = 'Admin Dashboard | CTA Manager';
@@ -132,6 +133,7 @@ const Admin: React.FC = () => {
       return;
     }
 
+    setIsCommitting(true);
     try {
       const repo = 'rishabhdon007/CTA_website';
       const path = 'src/data/pages.json';
@@ -174,6 +176,8 @@ const Admin: React.FC = () => {
       }
     } catch (err: any) {
       alert(`Commit error: ${err.message}`);
+    } finally {
+      setIsCommitting(false);
     }
   };
 
@@ -234,9 +238,23 @@ const Admin: React.FC = () => {
       <div className="admin-header glass-card" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
         <h2>Admin Dashboard</h2>
         <div className="header-actions">
-          <button className="btn btn-secondary" onClick={handleCommit}>
-            <GitCommit size={18} style={{ marginRight: '0.5rem' }} />
-            Commit to GitHub
+          <button
+            className="btn btn-secondary"
+            onClick={handleCommit}
+            disabled={isCommitting}
+            style={{ cursor: isCommitting ? 'not-allowed' : 'pointer', opacity: isCommitting ? 0.7 : 1 }}
+          >
+            {isCommitting ? (
+              <>
+                <Loader2 size={18} className="animate-spin" style={{ marginRight: '0.5rem' }} />
+                Committing...
+              </>
+            ) : (
+              <>
+                <GitCommit size={18} style={{ marginRight: '0.5rem' }} />
+                Commit to GitHub
+              </>
+            )}
           </button>
           <button className="btn btn-primary" onClick={() => { resetForm(); setEditingId(null); setIsFormOpen(true); }}>
             <Plus size={18} style={{ marginRight: '0.5rem' }} />
