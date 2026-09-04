@@ -138,7 +138,7 @@ const Admin: React.FC = () => {
       });
 
       if (putRes.ok) {
-        alert(`Successfully committed updated pages configuration to branch 'test-develop' on GitHub (rishabhdon007/CTA_website)!`);
+        alert("Successfully added. It will reflect in the next 2 mins.");
       } else {
         const errData = await putRes.json();
         alert(`GitHub API Commit Status: ${errData.message || 'Failed to commit'}`);
