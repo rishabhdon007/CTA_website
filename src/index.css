@@ -329,19 +329,77 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   .main-heading {
-    font-size: 3rem;
+    font-size: 2.25rem;
+    margin-bottom: 1rem;
   }
 
   .sub-heading {
-    font-size: 1.25rem;
+    font-size: 1.05rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .badge {
+    font-size: 0.775rem;
+    padding: 0.4rem 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .cta-button {
+    font-size: 1.05rem;
+    padding: 0.9rem 2rem;
+    min-width: auto;
+    width: 100%;
+    max-width: 320px;
   }
 
   .cta-content {
-    padding: 1rem;
+    padding: 1.25rem 1rem;
   }
   
   .top-bar {
     padding: 1rem;
+  }
+
+  .logo-container {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-heading {
+    font-size: 1.75rem;
+    line-height: 1.2;
+    margin-bottom: 0.85rem;
+  }
+
+  .sub-heading {
+    font-size: 0.925rem;
+    line-height: 1.45;
+    margin-bottom: 1.5rem;
+  }
+
+  .badge {
+    font-size: 0.725rem;
+    padding: 0.35rem 0.8rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .cta-button {
+    font-size: 0.925rem;
+    padding: 0.8rem 1.5rem;
+    width: 100%;
+  }
+
+  .top-bar {
+    padding: 0.85rem 1rem;
+  }
+
+  .logo-container {
+    font-size: 1.1rem;
+  }
+
+  .cta-content {
+    padding: 0.75rem 0.85rem;
   }
 }
 
